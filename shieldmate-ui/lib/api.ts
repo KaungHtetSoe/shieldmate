@@ -1,4 +1,4 @@
-const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 export type Mode = "phishng" | "wifisec" | "cybersec";
 export async function ask(topic: Mode, q: string, signal?: AbortSignal) {
