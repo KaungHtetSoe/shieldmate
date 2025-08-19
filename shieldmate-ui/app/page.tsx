@@ -163,6 +163,7 @@ import {
   appendMessage, renameChat, onActiveChange, type Mode, type Message
 } from "@/lib/storage";
 import { ask } from "@/lib/api";
+import { uuid } from "@/lib/uuid";
 
 const MODES: { key: Mode; label: string; hint: string }[] = [
   { key: "phishng", label: "Phishing Check", hint: "Analyze emails/text/links" },
@@ -228,7 +229,8 @@ export default function Page() {
     const text = input.trim();
     if (!text) return;
 
-    const u: Message = { id: crypto.randomUUID(), role: "user", content: text, ts: Date.now() };
+    // const u: Message = { id: crypto.randomUUID(), role: "user", content: text, ts: Date.now() };
+    const u: Message = { id: uuid(), role: "user", content: text, ts: Date.now() };
     setMessages(prev => [...prev, u]);
     appendMessage(chatId, u);
     setInput("");
@@ -238,11 +240,13 @@ export default function Page() {
 
     try {
       const data = await ask(mode, text, abortRef.current.signal);
-      const a: Message = { id: crypto.randomUUID(), role: "assistant", content: data.answer || "(no answer)", ts: Date.now() };
+      // const a: Message = { id: crypto.randomUUID(), role: "assistant", content: data.answer || "(no answer)", ts: Date.now() };
+      const a: Message = { id: uuid(), role: "assistant", content: data.answer || "(no answer)", ts: Date.now() };
       setMessages(prev => [...prev, a]);
       appendMessage(chatId, a);
     } catch (err: any) {
-      const a: Message = { id: crypto.randomUUID(), role: "assistant", content: `⚠️ ${err?.message || "Request failed"}`, ts: Date.now() };
+      // const a: Message = { id: crypto.randomUUID(), role: "assistant", content: `⚠️ ${err?.message || "Request failed"}`, ts: Date.now() };
+      const a: Message = { id: uuid(), role: "assistant", content: `⚠️ ${err?.message || "Request failed"}`, ts: Date.now() };
       setMessages(prev => [...prev, a]);
       appendMessage(chatId, a);
     } finally {

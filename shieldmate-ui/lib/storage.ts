@@ -1,3 +1,5 @@
+import { uuid } from "@/lib/uuid";
+
 export type Mode = "phishng" | "wifisec" | "cybersec";
 export type Chat = { id: string; title: string; createdAt: number };
 export type Message = { id: string; role: "user" | "assistant"; content: string; ts: number };
@@ -29,7 +31,7 @@ export function ensureClientId() {
   if (typeof window === "undefined") return;
   let id = localStorage.getItem(CLIENT_KEY);
   if (!id) {
-    id = crypto.randomUUID();
+    id = uuid();
     localStorage.setItem(CLIENT_KEY, id);
   }
   return id;
@@ -49,7 +51,8 @@ export function renameChat(id: string, title: string) {
   saveChats(chats);
 }
 export function newChat(): Chat {
-  const c: Chat = { id: crypto.randomUUID(), title: "New chat", createdAt: Date.now() };
+//   const c: Chat = { id: crypto.randomUUID(), title: "New chat", createdAt: Date.now() };
+  const c: Chat = { id: uuid(), title: "New chat", createdAt: Date.now() };
   const chats = getChats();
   chats.unshift(c);
   saveChats(chats);
