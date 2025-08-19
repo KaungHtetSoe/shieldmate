@@ -192,7 +192,7 @@ export default function Page() {
   // react to sidebar selection
   useEffect(() => {
     const unsub = onActiveChange((id) => {
-      let nextId = id || newChat().id;
+      const nextId = id || newChat().id;
       setChatId(nextId);
       const s = loadSession(nextId);
       setMode(s.mode);
