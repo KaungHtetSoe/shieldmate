@@ -1,0 +1,209 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* two-column shell */
+/* .shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+}
+@media (max-width: 800px) {
+  .shell { grid-template-columns: 1fr; }
+  aside.sidebar { display: none; }
+  .shell[data-open="1"] aside.sidebar { display: block; }
+}
+
+aside.sidebar {
+  border-right: 1px solid #e5e7eb;
+  padding: 12px;
+}
+.main {
+  padding: 16px;
+}
+
+/* sidebar bits */
+/* .brand { font-weight: 800; margin: 6px 0 12px; }
+.row { display:flex; gap:8px; align-items:center; }
+.btn {
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:8px 10px; border:1px solid #e5e7eb; border-radius:10px;
+  background:#fff; cursor:pointer; font-weight:600;
+}
+.btn.primary { background:#111; color:#fff; border-color:#111; }
+.list { margin:10px 0; padding:0; list-style:none; }
+.item { display:flex; justify-content:space-between; gap:8px; padding:8px; border:1px solid #eee; border-radius:10px; background:#fafafa; margin-bottom:8px; cursor:pointer; }
+.meta { color:#6b7280; font-size:12px; }
+hr { border:0; border-top:1px solid #eee; margin:12px 0; }
+.small { font-size:12px; color:#6b7280; }
+.topbar { display:none; }
+@media (max-width: 800px) {
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 12px; border-bottom:1px solid #e5e7eb;
+  }
+}
+
+ */
+
+/* ...keep your existing styles, then add/replace the mobile bits below... */
+
+/* Desktop defaults */
+.shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+}
+aside.sidebar {
+  border-right: 1px solid #e5e7eb;
+  padding: 12px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+}
+
+/* Top bar only visible on mobile */
+.topbar { display: none; }
+
+/* --- Mobile: off-canvas sidebar + backdrop --- */
+@media (max-width: 800px) {
+  .shell { grid-template-columns: 1fr; }
+
+  /* topbar visible on mobile */
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 12px; border-bottom:1px solid #e5e7eb;
+  }
+
+  aside.sidebar {
+    position: fixed;
+    z-index: 40;
+    top: 0; left: 0; bottom: 0;
+    width: 86vw; max-width: 360px;
+    background: #fff;
+    transform: translateX(-100%);
+    transition: transform .2s ease;
+    border-right: 1px solid #e5e7eb;
+  }
+  .shell[data-open="1"] aside.sidebar { transform: translateX(0); }
+
+  /* backdrop */
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    background: rgba(0,0,0,.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+  }
+  .shell[data-open="1"] .backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Buttons, lists, misc (keep from prior) */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:8px 10px; border:1px solid #e5e7eb; border-radius:10px;
+  cursor:pointer; font-weight:600;
+}
+.list { margin:10px 0; padding:0; list-style:none; }
+.item { display:flex; justify-content:space-between; gap:8px; padding:8px; border:1px solid #eee; border-radius:10px; background:#fafafa; margin-bottom:8px; cursor:pointer; }
+.small { font-size:12px; color:#6b7280; }
+.brand { font-weight: 800; margin: 6px 0 12px; }
+.row { display:flex; gap:8px; align-items:center; }
+
+
+
+/* --- chat styles --- */
+.chat { display: grid; gap: 10px; }
+.msg { padding: 10px 12px; border-radius: 12px; max-width: 80%; }
+.msg.user { background:#111; color:#fff; justify-self: end; border-bottom-right-radius: 6px; }
+.msg.assistant { background:#f3f4f6; color:#111; justify-self: start; border-bottom-left-radius: 6px; }
+.chatbar { display:flex; gap:8px; margin-top:12px; }
+.chatbar .input { flex:1; }
+.note { font-size:12px; color:#6b7280; }
+.fn-grid { display:grid; gap:10px; grid-template-columns: repeat(3,1fr); }
+.fn { border:1px solid #e5e7eb; border-radius:12px; padding:12px; cursor:pointer; text-align:center; }
+.fn.active { background:#111; color:#fff; border-color:#111; }
+
+
+
+/* chat list improvements */
+.item { position: relative; }
+.item.active { background:#eef2ff; border-color:#c7d2fe; }
+.actions {
+  display:flex; gap:6px; align-items:center;
+}
+.iconbtn {
+  border:1px solid #e5e7eb;
+  background:#fff;
+  padding:6px 8px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:700;
+  line-height:1;
+}
+.title-edit {
+  width:100%;
+  padding:8px 10px;
+  border:1px solid #e5e7eb;
+  border-radius:8px;
+  background:#fff;
+}
+
+
+/* main column becomes a vertical flex layout */
+.main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* stay full-height next to sidebar */
+  padding: 16px;
+}
+
+/* scrollable chat area that grows */
+.chat-scroll {
+  flex: 1;
+  overflow: auto;
+  padding-bottom: 12px;
+}
+
+/* sticky composer at the bottom */
+.composer {
+  position: sticky;
+  bottom: 0;
+  background: var(--bg, #fff);
+  border-top: 1px solid var(--border, #e5e7eb);
+  padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+  backdrop-filter: blur(4px);
+}
+
+/* existing chatbar styles still apply */
+.chatbar { display:flex; gap:8px; margin-top:0; }
