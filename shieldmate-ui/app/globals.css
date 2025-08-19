@@ -185,7 +185,7 @@ aside.sidebar {
   display: flex;
   flex-direction: column;
   min-height: 100vh; /* stay full-height next to sidebar */
-  padding: 16px;
+  padding: 10px;
 }
 
 /* scrollable chat area that grows */
@@ -207,3 +207,29 @@ aside.sidebar {
 
 /* existing chatbar styles still apply */
 .chatbar { display:flex; gap:8px; margin-top:0; }
+
+
+/* compact, auto-growing composer textarea */
+.composer textarea.input {
+  min-height: 44px;
+  max-height: 200px;
+  resize: none; /* JS will auto-grow */
+}
+.chatbar { align-items: flex-end; }
+
+
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  text-align: left;
+  font-size: 14px;
+}
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 999px;
+  font-size: 12px;
+}
+.data-classes { color: #374151; }

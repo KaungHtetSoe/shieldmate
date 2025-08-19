@@ -1,8 +1,15 @@
 import { uuid } from "@/lib/uuid";
 
-export type Mode = "phishng" | "wifisec" | "cybersec";
+import type { EmailCheckResponse } from "@/lib/api";
+
+export type Message =
+  | { id: string; role: "user" | "assistant"; content: string; ts: number; kind?: "text" }
+  | { id: string; role: "assistant"; content: string; ts: number; kind: "emailcheck"; payload: EmailCheckResponse };
+
+
+export type Mode = "phishng" | "wifisec" | "cybersec" | "emailbreached";
 export type Chat = { id: string; title: string; createdAt: number };
-export type Message = { id: string; role: "user" | "assistant"; content: string; ts: number };
+// export type Message = { id: string; role: "user" | "assistant"; content: string; ts: number };
 export type Session = { id: string; mode?: Mode; messages: Message[] };
 
 const CHATS_KEY = "sm_chats";

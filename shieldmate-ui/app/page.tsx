@@ -164,11 +164,25 @@ import {
 } from "@/lib/storage";
 import { ask } from "@/lib/api";
 import { uuid } from "@/lib/uuid";
+import EmailCheckResult from "@/components/EmailCheckResponse";
+
+// add near top of src/app/page.tsx (or a utils file)
+type EmailBreach = {
+  Name: string; Title: string; Domain: string | null; BreachDate: string;
+  AddedDate: string; PwnCount: number; DataClasses: string[]; IsVerified: boolean;
+  IsSensitive: boolean; LogoPath?: string;
+};
+
+type EmailCheckResponse = {
+  email: string; count: number; breaches: EmailBreach[]; ai_summary?: string; ai_error?: string;
+};
+
 
 const MODES: { key: Mode; label: string; hint: string }[] = [
   { key: "phishng", label: "Phishing Check", hint: "Analyze emails/text/links" },
   { key: "wifisec", label: "Wi-Fi Security", hint: "Harden router & network" },
   { key: "cybersec", label: "General Security", hint: "Cyber hygiene & triage" },
+  { key: "emailbreached", label: "Breached Email", hint: "Check your email's health" },
 ];
 
 export default function Page() {
@@ -179,6 +193,10 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const taRef = useRef<HTMLTextAreaElement | null>(null);
+
 
   // initial load
   useEffect(() => {
@@ -212,6 +230,13 @@ export default function Page() {
     }
   }, [messages.length]);
 
+
+function isEmailCheckMessage(
+  m: any
+): m is { kind: "emailcheck"; payload: EmailCheckResponse } {
+  return m && m.kind === "emailcheck" && m.payload && typeof m.payload.email === "string";
+}
+
   function labelFor(m?: Mode) {
     return MODES.find(x => x.key === m)?.label || "New chat";
   }
@@ -239,11 +264,48 @@ export default function Page() {
     abortRef.current = new AbortController();
 
     try {
-      const data = await ask(mode, text, abortRef.current.signal);
-      // const a: Message = { id: crypto.randomUUID(), role: "assistant", content: data.answer || "(no answer)", ts: Date.now() };
-      const a: Message = { id: uuid(), role: "assistant", content: data.answer || "(no answer)", ts: Date.now() };
-      setMessages(prev => [...prev, a]);
-      appendMessage(chatId, a);
+      // const data = await ask(mode, text, abortRef.current.signal);
+      // // const a: Message = { id: crypto.randomUUID(), role: "assistant", content: data.answer || "(no answer)", ts: Date.now() };
+      // const a: Message = { id: uuid(), role: "assistant", content: data.answer || "(no answer)", ts: Date.now() };
+      // setMessages(prev => [...prev, a]);
+      // appendMessage(chatId, a);
+      // const data = await ask(mode, text, abortRef.current.signal, /* opts if any */);
+      // let content: string;
+      // if ("answer" in data) {
+      //   // regular AI routes
+      //   content = data.answer || "(no answer)";
+      // } else {
+      //   // emailbreached route
+      //   content = renderEmailCheck(data as EmailCheckResponse);
+      // }
+      // const a: Message = { id: uuid(), role: "assistant", content, ts: Date.now() };
+      // setMessages(prev => [...prev, a]);
+      // appendMessage(chatId, a);
+      const data = await ask(mode, text, abortRef.current.signal, /* opts if any */);
+
+      if ("answer" in data) {
+        // regular AI
+        const a: Message = { id: uuid(), role: "assistant", content: data.answer || "(no answer)", ts: Date.now(), kind: "text" };
+        setMessages(prev => [...prev, a]);
+        appendMessage(chatId, a);
+      } else {
+        // emailbreached → show table UI
+        console.log(data);
+        const summary = data.count
+          ? `${data.count} breach(es) found for ${data.email}`
+          : `No breaches found for ${data.email}.`;
+
+        const a: Message = {
+          id: uuid(),
+          role: "assistant",
+          content: summary,       // short headline still stored/searchable
+          ts: Date.now(),
+          kind: "emailcheck",
+          payload: data as EmailCheckResponse
+        };
+        setMessages(prev => [...prev, a]);
+        appendMessage(chatId, a);
+      }
     } catch (err: any) {
       // const a: Message = { id: crypto.randomUUID(), role: "assistant", content: `⚠️ ${err?.message || "Request failed"}`, ts: Date.now() };
       const a: Message = { id: uuid(), role: "assistant", content: `⚠️ ${err?.message || "Request failed"}`, ts: Date.now() };
@@ -292,17 +354,19 @@ export default function Page() {
       <h1>Chat</h1>
       <p className="note">{lockedNote}</p>
 
-      <div ref={scrollRef} className="chat-scroll">
-        <div className="chat" style={{ marginTop: 12 }}>
-          {messages.map(msg => (
-            <div key={msg.id} className={`msg ${msg.role}`}>
-              {msg.content}
-            </div>
-          ))}
+      <div className="chat" style={{ marginTop: 12 }}>
+      {messages.map((msg) => (
+        <div key={msg.id} className={`msg ${msg.role}`}>
+          {isEmailCheckMessage(msg) ? (
+            <EmailCheckResult data={msg.payload} />
+          ) : (
+            msg.content
+          )}
         </div>
-      </div>
+      ))}
+    </div>
 
-      <div className="composer">
+      {/* <div className="composer">
         <form onSubmit={onSend} className="chatbar">
           <input
             className="input"
@@ -315,7 +379,37 @@ export default function Page() {
             {loading ? "Sending…" : "Send"}
           </button>
         </form>
+      </div> */}
+      <div className="composer p-2">
+        <form ref={formRef} onSubmit={onSend} className="chatbar">
+          <textarea
+            ref={taRef}
+            className="input p-2"
+            placeholder="Type your message…"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onInput={() => {
+              const ta = taRef.current;
+              if (!ta) return;
+              ta.style.height = "auto";
+              ta.style.height = Math.min(ta.scrollHeight, 300) + "px";
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                if (e.altKey || e.shiftKey) return; // allow newline
+                e.preventDefault();
+                if (!loading) formRef.current?.requestSubmit();
+              }
+            }}
+            disabled={loading}
+            rows={1}
+          />
+          <button className="btn primary" disabled={loading}>
+            {loading ? "Sending…" : "Send"}
+          </button>
+        </form>
       </div>
+
     </section>
   );
 }
