@@ -2,9 +2,20 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from openai import OpenAI
+from dotenv import load_dotenv
 
 # --- OpenAI client ---
 # Uses OPENAI_API_KEY from environment
+
+# --- load .env ---
+load_dotenv()  # reads .env in cwd
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise RuntimeError("OPENAI_API_KEY is not set. Add it to your .env file.")
+
+# --- OpenAI client using key from .env ---
+client = OpenAI(api_key=OPENAI_API_KEY)
 client = OpenAI()
 
 # --- Model choice (tweak as you like) ---
