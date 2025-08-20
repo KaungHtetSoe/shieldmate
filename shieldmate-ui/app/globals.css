@@ -81,6 +81,7 @@ hr { border:0; border-top:1px solid #eee; margin:12px 0; }
 aside.sidebar {
   border-right: 1px solid #e5e7eb;
   padding: 12px;
+  padding-top: 0px;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -137,7 +138,15 @@ aside.sidebar {
 .list { margin:10px 0; padding:0; list-style:none; }
 .item { display:flex; justify-content:space-between; gap:8px; padding:8px; border:1px solid #eee; border-radius:10px; background:#fafafa; margin-bottom:8px; cursor:pointer; }
 .small { font-size:12px; color:#6b7280; }
-.brand { font-weight: 800; margin: 6px 0 12px; }
+.brand { 
+  display: flex; 
+  font-weight: 800; 
+  margin: 6px 0 12px;  
+  gap: 8px; 
+  align-content: space-around;
+  justify-content: center;         
+  align-items: stretch;
+}
 .row { display:flex; gap:8px; align-items:center; }
 
 

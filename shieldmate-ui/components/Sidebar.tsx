@@ -6,6 +6,7 @@ import {
   getActiveChatId, setActiveChatId,
   getShareOptIn, setShareOptIn, renameChat
 } from "@/lib/storage";
+import Logo from "./Logo";
 
 export default function Sidebar() {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -64,7 +65,7 @@ export default function Sidebar() {
 
   return (
     <aside id="sm-sidebar" className="sidebar" role="navigation" aria-label="Chat history">
-      <div className="brand">🛡️ Shield Mate</div>
+      <Logo/>
 
       <div className="row" style={{ marginBottom: 10 }}>
         <button className="btn primary w-full bg-blue-500 text-sm text-white" onClick={handleNew}>+ New chat</button>

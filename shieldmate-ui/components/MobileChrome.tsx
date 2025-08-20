@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Logo from "./Logo";
 
 export default function MobileChrome() {
   const [open, setOpen] = useState(false);
@@ -20,7 +21,7 @@ export default function MobileChrome() {
   return (
     <>
       <div className="topbar">
-        <strong>🛡️ Shield Mate</strong>
+        <Logo/>
         <button
           className="btn"
           aria-label="Open menu"

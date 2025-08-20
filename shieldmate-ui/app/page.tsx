@@ -166,6 +166,8 @@ import { ask } from "@/lib/api";
 import { uuid } from "@/lib/uuid";
 import EmailCheckResult from "@/components/EmailCheckResponse";
 
+
+
 // add near top of src/app/page.tsx (or a utils file)
 type EmailBreach = {
   Name: string; Title: string; Domain: string | null; BreachDate: string;
@@ -192,11 +194,27 @@ export default function Page() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const formRef = useRef<HTMLFormElement | null>(null);
   const taRef = useRef<HTMLTextAreaElement | null>(null);
 
+  // for scrolling chat logs after new mesage receive 
+  const chatRef = useRef<HTMLDivElement | null>(null);
+  const endRef  = useRef<HTMLDivElement | null>(null);
+
+  function scrollToBottom(smooth = true) {
+    // sentinel scroll (preferred)
+    if (endRef.current) {
+      endRef.current.scrollIntoView({ behavior: smooth ? "smooth" : "auto" });
+      return;
+    }
+    // fallback
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }
 
   // initial load
   useEffect(() => {
@@ -224,18 +242,24 @@ export default function Page() {
   }, []);
 
   // auto-scroll on new messages
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages.length]);
+  // useEffect(() => {
+  //   if (scrollRef.current) {
+  //     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  //   }
+  // }, [messages.length]);
+  
+    // mount → jump immediately
+    useEffect(() => { scrollToBottom(false); }, []);
+
+    // after each send/receive → smooth scroll
+    useEffect(() => { scrollToBottom(true); }, [messages.length]);
 
 
-function isEmailCheckMessage(
-  m: any
-): m is { kind: "emailcheck"; payload: EmailCheckResponse } {
-  return m && m.kind === "emailcheck" && m.payload && typeof m.payload.email === "string";
-}
+  function isEmailCheckMessage(
+    m: any
+  ): m is { kind: "emailcheck"; payload: EmailCheckResponse } {
+    return m && m.kind === "emailcheck" && m.payload && typeof m.payload.email === "string";
+  }
 
   function labelFor(m?: Mode) {
     return MODES.find(x => x.key === m)?.label || "New chat";
@@ -257,6 +281,7 @@ function isEmailCheckMessage(
     // const u: Message = { id: crypto.randomUUID(), role: "user", content: text, ts: Date.now() };
     const u: Message = { id: uuid(), role: "user", content: text, ts: Date.now() };
     setMessages(prev => [...prev, u]);
+    requestAnimationFrame(() => scrollToBottom(true));
     appendMessage(chatId, u);
     setInput("");
     setLoading(true);
@@ -286,7 +311,8 @@ function isEmailCheckMessage(
       if ("answer" in data) {
         // regular AI
         const a: Message = { id: uuid(), role: "assistant", content: data.answer || "(no answer)", ts: Date.now(), kind: "text" };
-        setMessages(prev => [...prev, a]);
+        setMessages(prev => [...prev, a]); 
+        requestAnimationFrame(() => scrollToBottom(true));
         appendMessage(chatId, a);
       } else {
         // emailbreached → show table UI
@@ -304,12 +330,14 @@ function isEmailCheckMessage(
           payload: data as EmailCheckResponse
         };
         setMessages(prev => [...prev, a]);
+        requestAnimationFrame(() => scrollToBottom(true));
         appendMessage(chatId, a);
       }
     } catch (err: any) {
       // const a: Message = { id: crypto.randomUUID(), role: "assistant", content: `⚠️ ${err?.message || "Request failed"}`, ts: Date.now() };
       const a: Message = { id: uuid(), role: "assistant", content: `⚠️ ${err?.message || "Request failed"}`, ts: Date.now() };
       setMessages(prev => [...prev, a]);
+      requestAnimationFrame(() => scrollToBottom(true));
       appendMessage(chatId, a);
     } finally {
       setLoading(false);
@@ -354,17 +382,39 @@ function isEmailCheckMessage(
       <h1>Chat</h1>
       <p className="note">{lockedNote}</p>
 
-      <div className="chat" style={{ marginTop: 12 }}>
-      {messages.map((msg) => (
-        <div key={msg.id} className={`msg ${msg.role}`}>
-          {isEmailCheckMessage(msg) ? (
-            <EmailCheckResult data={msg.payload} />
-          ) : (
-            msg.content
-          )}
-        </div>
-      ))}
-    </div>
+      <div
+        ref={chatRef}
+        className="chat d-flex min-h-dvh h-auto"
+        style={{
+          marginTop: 12,
+          overflowY: "auto",
+          // subtract your header + spacing + composer heights; tweak as needed
+          maxHeight: "calc(100vh - 220px)"
+        }}
+      >
+        {messages.map((msg) => (
+          <div key={msg.id} className={`msg ${msg.role} min-h-auto`}>
+            {isEmailCheckMessage(msg) ? (
+              <EmailCheckResult data={msg.payload} />
+            ) : (
+              msg.content
+            )}
+          </div>
+        ))}
+        <div ref={endRef} /> {/* sentinel: scroll target */}
+      </div>
+
+      {/* <div className="chat d-flex min-h-dvh h-auto pb-4" style={{ marginTop: 12 }}>
+        {messages.map((msg) => (
+          <div key={msg.id} className={`msg ${msg.role}` + " min-h-auto " }>
+            {isEmailCheckMessage(msg) ? (
+              <EmailCheckResult data={msg.payload} />
+            ) : (
+              msg.content
+            )}
+          </div>
+        ))}
+      </div> */}
 
       {/* <div className="composer">
         <form onSubmit={onSend} className="chatbar">
