@@ -381,8 +381,24 @@ export default function Page() {
     <section style={{ display: "contents" }}>
       <h1>Chat</h1>
       <p className="note">{lockedNote}</p>
+      
+      <div className="chat-scroll" /* this div scrolls */>
+      <div className="chat" style={{ marginTop: 12 }}>
+        {messages.map((msg) => (
+          <div key={msg.id} className={`msg ${msg.role}`}>
+            {isEmailCheckMessage(msg) ? (
+              <EmailCheckResult data={msg.payload} />
+            ) : (
+              msg.content
+            )}
+          </div>
+        ))}
+        <div ref={endRef} /> {/* sentinel used by your scrollToBottom helper */}
+      </div>
+    </div>
 
-      <div
+
+      {/* <div
         ref={chatRef}
         className="chat d-flex min-h-dvh h-auto"
         style={{
@@ -401,8 +417,8 @@ export default function Page() {
             )}
           </div>
         ))}
-        <div ref={endRef} /> {/* sentinel: scroll target */}
-      </div>
+        <div ref={endRef} />
+      </div> */}
 
       {/* <div className="chat d-flex min-h-dvh h-auto pb-4" style={{ marginTop: 12 }}>
         {messages.map((msg) => (
