@@ -84,7 +84,7 @@ export default function Sidebar() {
         />
       </label>
 
-      <h4 style={{ margin: "12px 0 6px" }}>Chats</h4>
+      <h4 className="dark:text-gray-700" style={{ margin: "12px 0 6px" }}>Chats</h4>
       <ul className="list">
         {chats.length === 0 && <li className="small">No chats yet.</li>}
 
@@ -102,7 +102,7 @@ export default function Sidebar() {
               <div style={{ flex:1, minWidth:0 }}>
                 {isEditing ? (
                   <input
-                    className="title-edit"
+                    className="title-edit dark:text-gray-500"
                     value={editTitle}
                     onChange={(e)=>setEditTitle(e.target.value)}
                     onKeyDown={(e)=> {
@@ -113,7 +113,7 @@ export default function Sidebar() {
                   />
                 ) : (
                   <>
-                    <div style={{ fontWeight: 700, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                    <div style={{ fontWeight: 700, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }} className="dark:text-gray-600">
                       {c.title || "Untitled"}
                     </div>
                     <div className="small">{new Date(c.createdAt).toLocaleString()}</div>
@@ -125,7 +125,7 @@ export default function Sidebar() {
                 {!isEditing ? (
                   <>
                     <button
-                      className="iconbtn"
+                      className="iconbtn text-blue-600"
                       title="Open"
                       aria-label={`Open ${c.title || "chat"}`}
                       onClick={()=>handleSelect(c.id)}
@@ -133,7 +133,7 @@ export default function Sidebar() {
                       ↗
                     </button>
                     <button
-                      className="iconbtn"
+                      className="iconbtn text-gray-600"
                       title="Rename"
                       aria-label={`Rename ${c.title || "chat"}`}
                       onClick={()=>beginRename(c)}
@@ -141,7 +141,7 @@ export default function Sidebar() {
                       ✎
                     </button>
                     <button
-                      className="iconbtn"
+                      className="iconbtn text-orange-600"
                       title="Delete"
                       aria-label={`Delete ${c.title || "chat"}`}
                       onClick={()=>handleDelete(c.id)}
@@ -151,8 +151,8 @@ export default function Sidebar() {
                   </>
                 ) : (
                   <>
-                    <button className="iconbtn" title="Save" aria-label="Save" onClick={commitRename}>✔</button>
-                    <button className="iconbtn" title="Cancel" aria-label="Cancel" onClick={cancelRename}>↶</button>
+                    <button className="iconbtn text-green-700 " title="Save" aria-label="Save" onClick={commitRename}>✔</button>
+                    <button className="iconbtn text-orange-700" title="Cancel" aria-label="Cancel" onClick={cancelRename}> ✕ </button>
                   </>
                 )}
               </div>

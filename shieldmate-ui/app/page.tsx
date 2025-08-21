@@ -385,7 +385,7 @@ export default function Page() {
       <div className="chat-scroll" /* this div scrolls */>
       <div className="chat" style={{ marginTop: 12 }}>
         {messages.map((msg) => (
-          <div key={msg.id} className={`msg ${msg.role}`}>
+          <div key={msg.id} className={`msg ${msg.role}` +" dark:bg-gray-900 border-2 border-gray-500 dark:border-0"}>
             {isEmailCheckMessage(msg) ? (
               <EmailCheckResult data={msg.payload} />
             ) : (
@@ -446,7 +446,7 @@ export default function Page() {
           </button>
         </form>
       </div> */}
-      <div className="composer p-2">
+      <div className="composer bg-gray-50 p-2 dark:bg-black">
         <form ref={formRef} onSubmit={onSend} className="chatbar">
           <textarea
             ref={taRef}

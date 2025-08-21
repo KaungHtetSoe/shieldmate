@@ -197,7 +197,6 @@ aside.sidebar {
 .composer {
   position: sticky;
   bottom: 0;
-  background: var(--bg, #fff);
   border-top: 1px solid var(--border, #e5e7eb);
   padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
   backdrop-filter: blur(4px);
@@ -257,10 +256,14 @@ aside.sidebar {
   line-height: 1.5;
 }
 .msg.assistant {
-  background: #f3f4f6; color:#111; align-self: flex-start;
+  /* background: #f3f4f6; color:#111;  */
+  align-self: flex-start;
   border-bottom-left-radius: 6px;
 }
 .msg.user {
-  background: #111; color:#fff; align-self: flex-end;
+  background: #111; color:#fff; 
+  align-self: flex-end;
   border-bottom-right-radius: 6px;
+  border-color: #6b7280;
+  border:2px;
 }
