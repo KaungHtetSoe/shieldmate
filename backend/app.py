@@ -18,27 +18,25 @@ if not OPENAI_API_KEY:
 
 
 HIBP_API_KEY = os.getenv("HIBP_API_KEY")  # optional; required only if you call HIBP
-HIBP_USER_AGENT = os.getenv("HIBP_USER_AGENT", "ShieldMate/1.0 (admin@example.com)")
+HIBP_USER_AGENT = os.getenv("HIBP_USER_AGENT", "ShieldMate/1.0")
 
 # --- OpenAI client using key from .env ---
 client = OpenAI(api_key=OPENAI_API_KEY)
 client = OpenAI()
 
-# --- Model choice (tweak as you like) ---
-# Tip: 4.1-mini/4o-mini are fast & inexpensive; upgrade model if you need deeper reasoning.
+# --- Model choice ---
 MODEL = "gpt-4.1-mini"
 
-# --- Route-specific prompt arrays (edit these to your liking) ---
+# --- Route-specific prompt arrays ---
 PROMPT_MAP = {
-    # NOTE: kept your route spelling "phishng" exactly
     "phishng": [
         {
             "role": "system",
             "content": (
-                "You are Shield Mate, an AI assistant specialized in phishing triage. "
-                "Give clear, actionable steps, highlight red flags, and suggest safe verification. "
-                "Never request or output secrets. If the user shares URLs, analyze safely (no live fetching). "
-                "Prefer concise bullets; include a short final verdict: {Likely phishing | Unsure | Likely safe}."
+                "You are Shield Mate, a cybersecurity assistant that only identifies phishing attempts."
+                "Analyze any given text, email, or link for phishing indicators (suspicious URLs, urgent language, requests for sensitive info, spoofed domains)."
+                "Explain clearly in beginner-friendly terms whether it is likely phishing, suspicious, or appears safe, and give simple safety advice without interacting with real links. "
+                "If the user asks about anything unrelated to phishing analysis, politely respond that you can only help with phishing detection."
             ),
         }
     ],
@@ -46,9 +44,9 @@ PROMPT_MAP = {
         {
             "role": "system",
             "content": (
-                "You are Shield Mate focusing on Wi-Fi security. Prioritize WPA3/WPA2, strong passphrases, "
-                "disable WPS, router firmware updates, guest networks, IoT isolation, DNS/DoH options. "
-                "Give step-by-step, device-agnostic guidance. Keep answers succinct and practical."
+                "You are Shield Mate, a cybersecurity assistant that only helps users set up secure Wi-Fi and avoid unsafe connections."
+                "Provide beginner-friendly guidance on creating strong passwords, enabling WPA3/WPA2 encryption, updating router firmware, disabling risky settings (like WPS), and recognizing unsafe public Wi-Fi."
+                "If the user asks about anything outside Wi-Fi security, politely respond that you can only answer questions about Wi-Fi security."
             ),
         }
     ],
@@ -56,15 +54,14 @@ PROMPT_MAP = {
         {
             "role": "system",
             "content": (
-                "You are Shield Mate for general cybersecurity. Provide prioritized mitigation steps, "
-                "threat modeling lite, and plain-language explanations. Avoid legal advice; suggest contacting "
-                "professionals when incidents involve loss or crime."
+                "You are Shield Mate, a cybersecurity assistant that only provides up-to-date threat alerts and answers cybersecurity-related questions."
+                "Explain threats and concepts in simple, beginner-friendly language with safe and practical advice."
+                "If the user asks about anything outside cybersecurity threats or security education, politely respond that you can only help with threat alerts and cybersecurity education."
             ),
         }
     ],
 }
 
-# Accept IDN punycode (xn--) and common local-part chars
 EMAIL_RE = re.compile(
     r'\b[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+(?:[A-Za-z]{2,63}|xn--[A-Za-z0-9-]{2,59})\b'
 )
@@ -207,7 +204,7 @@ def _ask(topic_key):
         if hasattr(completion, "usage") and completion.usage:
             # Make usage JSON-serializable across client versions
             try:
-                usage = completion.usage.model_dump()  # pydantic-style
+                usage = completion.usage.model_dump()
             except Exception:
                 try:
                     usage = completion.usage.dict()
@@ -252,17 +249,6 @@ def create_app():
     
     @app.post("/ask/emailbreached")
     def ask_emailcheck():
-        """
-        Body JSON:
-        {
-            "question": "check my email user@example.com is breached?",  # preferred (we'll extract)
-            "email": null,                          # optional explicit override
-            "truncate": false,                      # optional HIBP param
-            "include_unverified": false,            # optional HIBP param
-            "domain": null,                         # optional HIBP param
-            "with_ai": false                        # optional AI summary
-        }
-        """
         data = request.get_json(silent=True) or {}
 
         # 1) Prefer explicit email if present
@@ -277,7 +263,7 @@ def create_app():
 
         if not email:
             return jsonify({
-                "answer": "Breach checking require Email address, Provide 'email' directly or include an email address inside 'question'."
+                "answer": "To check for breaches, simply enter your email address in the 'email' field or include it in the 'question' field."
             }), 200
 
         truncate = bool(data.get("truncate", False))
